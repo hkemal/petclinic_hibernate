@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+                                         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+ <session-factory>
+  <property name="hibernate.connection.driver_class">org.h2.Driver</property>
+  <property name="hibernate.connection.url">jdbc:h2:tcp://localhost/~/petclinic</property>
+  <property name="hibernate.connection.username">sa</property>
+  <mapping class="com.javaegitimleri.petclinic.entity.Pet"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.OwnerCompositePrimaryKey"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Owner"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Vet"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Visit"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Image"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.ImageContent"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Clinic"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.City"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.PetType"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Speciality"></mapping>
+  <mapping class="com.javaegitimleri.petclinic.entity.Person"></mapping>
+ </session-factory>
+</hibernate-configuration>
