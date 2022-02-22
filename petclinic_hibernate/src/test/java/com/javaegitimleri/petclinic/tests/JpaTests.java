@@ -1,10 +1,7 @@
 package com.javaegitimleri.petclinic.tests;
 
 import com.javaegitimleri.petclinic.config.JpaConfig;
-import com.javaegitimleri.petclinic.entity.Address;
-import com.javaegitimleri.petclinic.entity.Owner;
-import com.javaegitimleri.petclinic.entity.Pet;
-import com.javaegitimleri.petclinic.entity.Rating;
+import com.javaegitimleri.petclinic.entity.*;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -16,6 +13,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 public class JpaTests {
+
+    @Test
+    public void testDelete() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin();
+        Visit visit = entityManager.find(Visit.class, 3L);
+        //entityManager.clear();
+        entityManager.remove(visit);
+        tx.commit();
+
+    }
+
     @Test
     public void testHibernateApiAccess2() {
         EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();

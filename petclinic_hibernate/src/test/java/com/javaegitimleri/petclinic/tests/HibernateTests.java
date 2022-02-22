@@ -18,6 +18,31 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testFlushTxRelationShip() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+
+        Owner owner = session.get(Owner.class, 7L);
+        owner.setRating(null);
+        session.persist(new Pet("my pet",new Date()));
+        session.flush();
+        System.out.printf("--- After flush() ---");
+        tx.rollback();
+    }
+
+    @Test
+    public void testDelete() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        //Visit visit = session.load(Visit.class, 1L);
+        Visit visit = session.load(Visit.class, 2L);
+        session.clear();
+        session.delete(visit);
+        tx.commit();
+        session.close();
+    }
+
+    @Test
     public void testHibernateInitialize() {
         Session session = HibernateConfig.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
