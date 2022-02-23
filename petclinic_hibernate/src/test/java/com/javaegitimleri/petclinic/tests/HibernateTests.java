@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -18,13 +19,41 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
-    public void testFlushTxRelationShip() {
+    public void testRefresh() throws IOException {
         Session session = HibernateConfig.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
+        PetType petType = session.get(PetType.class, 1L);
+        System.out.println("---PetType Loaded ---");
+        petType.setName("my pet type");
+
+        System.out.println("--- waiting ---");
+        System.in.read();
+        session.refresh(petType);
+        System.out.println("--- after refresh ---");
+        System.out.println(petType.getName());
+    }
+
+    @Test
+    public void testFlushManual() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        session.setHibernateFlushMode(FlushMode.MANUAL);
         Owner owner = session.get(Owner.class, 7L);
         owner.setRating(null);
-        session.persist(new Pet("my pet",new Date()));
+        session.flush();
+        tx.commit();
+        session.close();
+        System.out.println("---after session close ---");
+    }
+
+    @Test
+    public void testFlushTxRelationShip() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Owner owner = session.get(Owner.class, 7L);
+        owner.setRating(null);
+        session.persist(new Pet("my pet", new Date()));
         session.flush();
         System.out.printf("--- After flush() ---");
         tx.rollback();
