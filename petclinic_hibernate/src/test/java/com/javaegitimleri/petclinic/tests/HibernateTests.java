@@ -19,6 +19,42 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testContextualSession() {
+        Session session = HibernateConfig.getSessionFactory().getCurrentSession();
+        Transaction tx = session.beginTransaction();
+
+        PetType petType = session.get(PetType.class, 1L);
+        petType.setName("asdf");
+        tx.commit();
+        //session.close();
+        System.out.println("--- after tx commit ---");
+        System.out.println("Session open : " + session.isOpen());
+    }
+
+    @Test
+    public void testCascade() throws IOException {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+
+        Owner owner = new Owner();
+        owner.setFirstName("Kemal");
+        owner.setLastName("Kara");
+
+        Pet pet = new Pet();
+        pet.setName("My puppy");
+        owner.getPets().add(pet);
+        pet.setOwner(owner);
+        session.persist(owner);
+
+        Visit visit = new Visit();
+        visit.setVisitDescription("checkUp");
+        visit.setVisitDate(new Date());
+
+        tx.commit();
+        session.close();
+    }
+
+    @Test
     public void testRefresh() throws IOException {
         Session session = HibernateConfig.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();

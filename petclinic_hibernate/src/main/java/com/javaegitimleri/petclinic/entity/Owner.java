@@ -1,5 +1,7 @@
 package com.javaegitimleri.petclinic.entity;
 
+import org.hibernate.annotations.Cascade;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -29,7 +31,8 @@ public class Owner extends Person {
     @Embedded
     private Address address;
 
-    @OneToMany(mappedBy = "owner")
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
+    @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private Set<Pet> pets = new HashSet<>();
 
 //    ValueTİp ile one-to-many ilişki
