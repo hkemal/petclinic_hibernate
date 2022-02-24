@@ -3,6 +3,9 @@ package com.javaegitimleri.petclinic.tests;
 import com.javaegitimleri.petclinic.config.HibernateConfig;
 import com.javaegitimleri.petclinic.config.JpaConfig;
 import com.javaegitimleri.petclinic.entity.*;
+import com.javaegitimleri.petclinic.repository.ClinicRepository;
+import com.javaegitimleri.petclinic.repository.OwnerRepository;
+import com.javaegitimleri.petclinic.service.PetClinicService;
 import org.hibernate.*;
 import org.hibernate.stat.EntityStatistics;
 import org.hibernate.stat.QueryStatistics;
@@ -17,6 +20,34 @@ import java.util.Date;
 import java.util.List;
 
 public class HibernateTests {
+
+    @Test
+    public void testLayeredArchitechure() {
+        OwnerRepository ownerRepository = new OwnerRepository();
+        ClinicRepository clinicRepository = new ClinicRepository();
+        SessionFactory sessionFactory = HibernateConfig.getSessionFactory();
+
+        ownerRepository.setSessionFactory(sessionFactory);
+        clinicRepository.setSessionFactory(sessionFactory);
+
+        PetClinicService petClinicService = new PetClinicService(ownerRepository, clinicRepository);
+        Transaction tx = sessionFactory.getCurrentSession().beginTransaction();
+
+        Owner owner1 = new Owner();
+        owner1.setFirstName("A");
+        owner1.setLastName("B");
+
+        Owner owner2 = new Owner();
+        owner2.setFirstName("C");
+        owner2.setLastName("D");
+        try {
+            petClinicService.addNewOwners(1L, owner1, owner2);
+            tx.commit();
+        } catch (Exception ex) {
+            tx.rollback();
+            throw ex;
+        }
+    }
 
     @Test
     public void testContextualSession() {
