@@ -22,6 +22,28 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testConcurency() {
+        Session session1 = HibernateConfig.getSessionFactory().openSession();
+        session1.beginTransaction();
+        Session session2 = HibernateConfig.getSessionFactory().openSession();
+        session2.beginTransaction();
+
+        Pet pet1 = session1.get(Pet.class, 1L);
+        Pet pet2 = session1.get(Pet.class, 1L);
+
+        pet1.setOwner(session1.load(Owner.class, 8L));
+        pet2.setType(session1.load(PetType.class, 6L));
+
+        session2.getTransaction().commit();
+        System.out.println("--- After session 2 commit ---");
+        session1.getTransaction().commit();
+        System.out.println("--- After session 1 commit ---");
+
+        session1.close();
+        session2.close();
+    }
+
+    @Test
     public void testLayeredArchitechure() {
         OwnerRepository ownerRepository = new OwnerRepository();
         ClinicRepository clinicRepository = new ClinicRepository();
