@@ -22,6 +22,25 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testAuditInterceptor() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        session.beginTransaction();
+
+        Pet pet = new Pet();
+        pet.setName("Tikky 12");
+        pet.setBirthDate(new Date());
+        session.persist(pet);
+
+        Pet pet1 = session.get(Pet.class, 1L);
+        pet1.setBirthDate(new Date());
+
+        Pet pet2 = session.load(Pet.class, 2L);
+        session.delete(pet2);
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    @Test
     public void testConcurency() {
         Session session1 = HibernateConfig.getSessionFactory().openSession();
         session1.beginTransaction();

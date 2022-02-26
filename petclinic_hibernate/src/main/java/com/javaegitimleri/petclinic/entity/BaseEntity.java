@@ -1,7 +1,10 @@
 package com.javaegitimleri.petclinic.entity;
 
+import com.javaegitimleri.petclinic.event.AuditEntityEventListener;
+
 import javax.persistence.*;
 
+@EntityListeners(AuditEntityEventListener.class)
 @MappedSuperclass
 public abstract class BaseEntity {
 

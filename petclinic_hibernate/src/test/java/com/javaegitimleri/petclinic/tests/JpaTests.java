@@ -1,5 +1,6 @@
 package com.javaegitimleri.petclinic.tests;
 
+import com.javaegitimleri.petclinic.config.HibernateConfig;
 import com.javaegitimleri.petclinic.config.JpaConfig;
 import com.javaegitimleri.petclinic.entity.*;
 import org.hibernate.FlushMode;
@@ -11,8 +12,29 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import java.util.Date;
 
 public class JpaTests {
+
+    @Test
+    public void testLifeCycleCallback() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin();
+
+        Pet pet = new Pet();
+        pet.setName("Tikky 23");
+        pet.setBirthDate(new Date());
+        entityManager.persist(pet);
+
+        Pet pet1 = entityManager.find(Pet.class, 1L);
+        pet1.setBirthDate(new Date());
+
+        Pet pet2 = entityManager.getReference(Pet.class, 100L);
+        entityManager.remove(pet2);
+        tx.commit();
+        entityManager.close();
+    }
 
     @Test
     public void testDelete() {
