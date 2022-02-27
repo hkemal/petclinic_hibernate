@@ -50,5 +50,14 @@ public abstract class Person extends BaseEntity {
     public void setEmails(Set<Email> emails) {
         this.emails = emails;
     }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", emails=" + emails +
+                '}';
+    }
 }
 

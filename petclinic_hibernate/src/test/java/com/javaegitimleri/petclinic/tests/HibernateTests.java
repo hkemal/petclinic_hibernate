@@ -7,6 +7,7 @@ import com.javaegitimleri.petclinic.repository.ClinicRepository;
 import com.javaegitimleri.petclinic.repository.OwnerRepository;
 import com.javaegitimleri.petclinic.service.PetClinicService;
 import org.hibernate.*;
+import org.hibernate.query.Query;
 import org.hibernate.stat.EntityStatistics;
 import org.hibernate.stat.QueryStatistics;
 import org.hibernate.stat.Statistics;
@@ -20,6 +21,80 @@ import java.util.Date;
 import java.util.List;
 
 public class HibernateTests {
+
+    @Test
+    public void testReportQueries() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        String queryString = "select P.name, P.birthDate from Pet as P where P.name like :petName ";
+        Query query = session.createQuery(queryString);
+        query.setParameter("petName", "%");
+
+        List<Object[]> resultList = query.getResultList();
+        for (Object[] item : resultList) {
+            String name = (String) item[0];
+            Date birthDate = (Date) item[1];
+            System.out.println(name);
+            System.out.println(birthDate);
+        }
+    }
+
+    @Test
+    public void testJoin() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        String queryString = "select distinct O from Owner as O left outer join O.pets as P where P.name like :petName ";
+        Query<Owner> query = session.createQuery(queryString);
+        query.setParameter("petName", "%");
+
+        /*
+        List<Object[]> resultList = query.getResultList();
+        System.out.println("--- query executed ---");
+        for (Object[] item : resultList) {
+            Owner owner = (Owner) item[0];
+            Pet pet = (Pet) item[1];
+            System.out.println(owner);
+            System.out.println(pet);
+        }
+        */
+
+        List<Owner> resultList = query.getResultList();
+        resultList.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testHQLPositionalParameters() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+
+        String queryString = " " +
+                " select P " +
+                " from Pet as P " +
+                " where P.name like ? " +
+                " or P.type.id = ? ";
+        Query<Pet> query = session.createQuery(queryString);
+        query.setParameter(0, "%K%");
+        query.setParameter(1, 1L);
+
+        List<Pet> resultList = query.getResultList();
+        System.out.println("--- query executed ---");
+        resultList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testHQL() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+
+        String queryString = " " +
+                " select P " +
+                " from Pet as P " +
+                " where P.name like :petName " +
+                " or P.type.id = :typeId ";
+        Query<Pet> query = session.createQuery(queryString);
+        query.setParameter("petName", "%K%");
+        query.setParameter("typeId", 1L);
+
+        List<Pet> resultList = query.getResultList();
+        System.out.println("--- query executed ---");
+        resultList.forEach(System.out::println);
+    }
 
     @Test
     public void testAuditInterceptor() {
@@ -601,7 +676,7 @@ public class HibernateTests {
         Address address = new Address();
         address.setPhone("543");
         address.setStreet("Kisikli");
-        owner.setAddress(address);
+        //owner.setAddress(address);
 
         Session session = HibernateConfig.getSessionFactory().openSession();
         EntityTransaction tx = session.beginTransaction();

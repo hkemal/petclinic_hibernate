@@ -1,6 +1,5 @@
 package com.javaegitimleri.petclinic.tests;
 
-import com.javaegitimleri.petclinic.config.HibernateConfig;
 import com.javaegitimleri.petclinic.config.JpaConfig;
 import com.javaegitimleri.petclinic.entity.*;
 import org.hibernate.FlushMode;
@@ -12,9 +11,51 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import java.util.Date;
+import java.util.List;
 
 public class JpaTests {
+
+    @Test
+    public void testJPQLPositionalParameters() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+
+        String queryString = " " +
+                " select P " +
+                " from Pet as P " +
+                " where P.name like ?1 " +
+                " or P.type.id = ?2 ";
+        TypedQuery typedQuery = entityManager.createQuery(queryString, Pet.class);
+        typedQuery.setParameter(1, "%K%");
+        typedQuery.setParameter(2, 1L);
+
+        List<Pet> resultList = typedQuery.getResultList();
+        System.out.println("--- query executed ---");
+        resultList.forEach(System.out::println);
+
+        entityManager.close();
+    }
+
+    @Test
+    public void testJPQL() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+
+        String queryString = " " +
+                " select P " +
+                " from Pet as P " +
+                " where P.name like :petName " +
+                " or P.type.id = :typeId ";
+        TypedQuery typedQuery = entityManager.createQuery(queryString, Pet.class);
+        typedQuery.setParameter("petName", "%K%");
+        typedQuery.setParameter("typeId", 1L);
+
+        List<Pet> resultList = typedQuery.getResultList();
+        System.out.println("--- query executed ---");
+        resultList.forEach(System.out::println);
+
+        entityManager.close();
+    }
 
     @Test
     public void testLifeCycleCallback() {
