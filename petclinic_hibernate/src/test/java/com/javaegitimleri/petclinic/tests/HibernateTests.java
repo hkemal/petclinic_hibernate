@@ -7,10 +7,12 @@ import com.javaegitimleri.petclinic.repository.ClinicRepository;
 import com.javaegitimleri.petclinic.repository.OwnerRepository;
 import com.javaegitimleri.petclinic.service.PetClinicService;
 import org.hibernate.*;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.hibernate.stat.EntityStatistics;
 import org.hibernate.stat.QueryStatistics;
 import org.hibernate.stat.Statistics;
+import org.hibernate.transform.AliasToBeanResultTransformer;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
@@ -21,6 +23,41 @@ import java.util.Date;
 import java.util.List;
 
 public class HibernateTests {
+
+    @Test
+    public void testNativeSQL() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        NativeQuery nativeQuery = session.createNativeQuery(" select * from hsr_pet as P where P.pet_name like ? ");
+        NativeQuery<Pet> nativeQuery1 = session.createNativeQuery(" select * from hsr_pet as P where P.pet_name like ? ", Pet.class);
+        nativeQuery.setParameter(1, "K%");
+        List<Object[]> resultList = nativeQuery.getResultList();
+        for (Object[] item : resultList) {
+            for (Object it : item) {
+                System.out.print(it + "   ");
+            }
+            System.out.println("\n***---***");
+        }
+        System.out.println("-----------------");
+        nativeQuery1.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testNamedQuery() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Query<Pet> query = session.createNamedQuery("findPetsByName", Pet.class);
+        query.setParameter("name", "K%");
+        List<Pet> resultList = query.getResultList();
+        resultList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testQueriesWithDTO() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        //String queryString = "select new com.javaegitimleri.petclinic.entity.Pet(P.name, P.birthDate) from Pet as P ";
+        String queryString = "select P.name as name, P.birthDate as birthDate  from Pet as P ";
+        List<Pet> resultList = session.createQuery(queryString).setResultTransformer(new AliasToBeanResultTransformer(Pet.class)).getResultList();
+        resultList.forEach(System.out::println);
+    }
 
     @Test
     public void testReportQueries() {

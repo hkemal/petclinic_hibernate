@@ -11,11 +11,28 @@ import org.junit.Test;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.Date;
 import java.util.List;
 
 public class JpaTests {
+
+    @Test
+    public void testNativeSQLDTOClass() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        Query nativeQuery = entityManager.createNativeQuery(" select * from hsr_pet as P where P.pet_name like ?1 ", "petWithNameAndBirthDate");
+        nativeQuery.setParameter(1, "K%");
+        List<Pet> resultList = nativeQuery.getResultList();
+        resultList.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testNativeSQLJPA() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        List resultList = entityManager.createNativeQuery(" select * from hsr_pet as P where P.pet_name like ?1 ", Pet.class).setParameter(1, "K%").getResultList();
+        resultList.stream().forEach(System.out::println);
+    }
 
     @Test
     public void testJPQLPositionalParameters() {
