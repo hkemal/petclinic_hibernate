@@ -7,8 +7,13 @@ import com.javaegitimleri.petclinic.repository.ClinicRepository;
 import com.javaegitimleri.petclinic.repository.OwnerRepository;
 import com.javaegitimleri.petclinic.service.PetClinicService;
 import org.hibernate.*;
+import org.hibernate.criterion.ProjectionList;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.SimpleExpression;
 import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
+import org.hibernate.sql.JoinType;
 import org.hibernate.stat.EntityStatistics;
 import org.hibernate.stat.QueryStatistics;
 import org.hibernate.stat.Statistics;
@@ -23,6 +28,62 @@ import java.util.Date;
 import java.util.List;
 
 public class HibernateTests {
+
+    @Test
+    public void testCriteriaAPIWithJoinsAlias() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Criteria rootCriteria = session.createCriteria(Owner.class);
+        rootCriteria.createAlias("pets", "p", JoinType.LEFT_OUTER_JOIN);
+//        rootCriteria.add(Restrictions.like("p.name", "K%"));
+        rootCriteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        List<Owner> list = rootCriteria.list();
+        list.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaAPIWithJoinsSubcriteria() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Criteria rootCriteria = session.createCriteria(Owner.class);
+        Criteria petsCriteria = rootCriteria.createCriteria("pets");
+        petsCriteria.add(Restrictions.like("name", "K%"));
+        List<Owner> list = rootCriteria.list();
+        list.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaAPIWithProjections() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Criteria criteria = session.createCriteria(Pet.class);
+        ProjectionList projectionList = Projections.projectionList().add(Projections.property("name").as("name")).add(Projections.property("birthDate").as("birthDate"));
+        criteria.setProjection(projectionList);
+//        List<Object[]> list = criteria.list();
+//        for (Object[] item : list) {
+//            for (Object it : item) {
+//                System.out.print(it + "   ");
+//            }
+//            System.out.println("\n***---***");
+//        }
+        criteria.setResultTransformer(new AliasToBeanResultTransformer(Pet.class));
+        List<Pet> list = criteria.list();
+        list.stream().forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaAPI() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Criteria criteria = session.createCriteria(Pet.class);
+//        SimpleExpression eqNameCriterion = Restrictions.eq("name", "K%");
+        SimpleExpression eqTypeIdCriterion = Restrictions.eq("type.id", 4L);
+//       criteria.add(Restrictions.or(Restrictions.or(eqNameCriterion, eqTypeIdCriterion)));
+
+        SimpleExpression likeNameCriterion = Restrictions.like("name", "K%");
+        criteria.add(Restrictions.or(Restrictions.or(likeNameCriterion, eqTypeIdCriterion)));
+        List<Pet> list = criteria.list();
+        list.stream().forEach(item -> {
+            System.out.println(item.getName());
+            System.out.println(item.getBirthDate());
+        });
+    }
 
     @Test
     public void testNativeSQL() {
