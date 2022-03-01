@@ -13,10 +13,41 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
 import java.util.Date;
 import java.util.List;
 
 public class JpaTests {
+
+    @Test
+    public void testCriteriaWithInnerJoin() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Pet> criteriaQuery = criteriaBuilder.createQuery(Pet.class);
+        Root<Pet> root = criteriaQuery.from(Pet.class);
+        Join<Pet, PetType> join = root.join("type");
+        Predicate predicate = criteriaBuilder.equal(join.get("id"), 4L);
+        criteriaQuery.where(predicate);
+        TypedQuery<Pet> typedQuery = entityManager.createQuery(criteriaQuery);
+        List<Pet> resultList = typedQuery.getResultList();
+        resultList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaApi() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Pet> criteriaQuery = criteriaBuilder.createQuery(Pet.class);
+        Root<Pet> root = criteriaQuery.from(Pet.class);
+        Predicate likeNamePredicate = criteriaBuilder.like(root.get("name"), criteriaBuilder.parameter(String.class, "petName"));
+        Predicate eqTypePredicate = criteriaBuilder.equal(root.get("type"), 4L);
+        Predicate orPredicate = criteriaBuilder.or(likeNamePredicate, eqTypePredicate);
+        criteriaQuery.where(orPredicate);
+        TypedQuery<Pet> typedQuery = entityManager.createQuery(criteriaQuery);
+        typedQuery.setParameter("petName", "K%");
+        List<Pet> resultList = typedQuery.getResultList();
+        resultList.forEach(System.out::println);
+    }
 
     @Test
     public void testNativeSQLDTOClass() {
