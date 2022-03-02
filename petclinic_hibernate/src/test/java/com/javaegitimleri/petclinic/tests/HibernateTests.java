@@ -30,6 +30,43 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testPaging() {
+        Integer pageSize = 2;
+        String queryString = " " +
+                " select distinct P from Pet as P " +
+                " left join P.visits as V " +
+                " where V.visitDate <= :today ";
+
+//        String queryString = " " +
+//                " select distinct P from Pet as P " +
+//                " left join fetch P.visits as V " +
+//                " where V.visitDate <= :today "; => fetch keyword deactivate paging
+
+        String countryQueryString =
+                " select count(distinct P.id) from Pet as P " +
+                        " left join P.visits as V " +
+                        " where V.visitDate <= :today ";
+        Date today = new Date();
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Long petsCount = session.createQuery(countryQueryString, Long.class).setParameter("today", today).getSingleResult();
+        Long pageCount = petsCount / pageSize;
+        pageCount += petsCount % pageSize != 0 ? 1 : 0;
+        System.out.println("****************");
+        System.out.println("Entity count is : " + petsCount);
+        System.out.println("Page count is : " + pageCount);
+        for (int page = 0; page < pageCount; page++) {
+            System.out.println("****************");
+            Query<Pet> query = session.createQuery(queryString + " order by P.id asc", Pet.class);
+            query.setParameter("today", today);
+            query.setFirstResult(page * pageSize);
+            query.setMaxResults(pageSize);
+            List<Pet> resultList = query.getResultList();
+            resultList.stream().forEach(System.out::println);
+            System.out.println("--- current page is : " + page + " ---");
+        }
+    }
+
+    @Test
     public void testSubselectFetching() {
         Session session = HibernateConfig.getSessionFactory().openSession();
         List<Pet> pets = session.createQuery(" select P from Pet as P ", Pet.class).getResultList();
