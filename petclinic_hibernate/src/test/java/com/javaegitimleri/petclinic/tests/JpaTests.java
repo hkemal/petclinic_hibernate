@@ -17,6 +17,36 @@ import java.util.List;
 public class JpaTests {
 
     @Test
+    public void testBulkDeleteWithCriteriaApi() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaDelete<Image> criteriaDelete = criteriaBuilder.createCriteriaDelete(Image.class);
+        Root<Image> root = criteriaDelete.from(Image.class);
+        criteriaDelete.from(Image.class);
+        Integer deleteCount = entityManager.createQuery(criteriaDelete).executeUpdate();
+        System.out.println("--- query executed, delete count is : " + deleteCount);
+        tx.commit();
+        entityManager.close();
+    }
+
+    @Test
+    public void testBulkUpdateWithCriteriaApi() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx = entityManager.getTransaction();
+        tx.begin();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaUpdate<Image> criteriaUpdate = criteriaBuilder.createCriteriaUpdate(Image.class);
+        Root<Image> root = criteriaUpdate.from(Image.class);
+        criteriaUpdate.set(root.get("pet"), (Pet) null);
+        Integer updateCount = entityManager.createQuery(criteriaUpdate).executeUpdate();
+        System.out.println("--- query executed, update count is : " + updateCount);
+        tx.commit();
+        entityManager.close();
+    }
+
+    @Test
     public void testCriteriaWithMetaModel() {
         EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
