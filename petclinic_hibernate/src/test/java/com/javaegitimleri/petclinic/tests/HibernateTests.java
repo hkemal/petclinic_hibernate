@@ -30,6 +30,26 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testBulkDelete() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Integer deleteCount = session.createQuery("delete Image as I where I.pet.id = 3").executeUpdate();
+        System.out.println("--- delete executed, delete count is : " + deleteCount + " ---");
+        tx.commit();
+        session.close();
+    }
+
+    @Test
+    public void testBulkUpdate() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx = session.beginTransaction();
+        Integer updateCount = session.createQuery("update versioned ImageContent set content = null ").executeUpdate();
+        System.out.println("--- update executed, update count is : " + updateCount + " ---");
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    @Test
     public void testPaging() {
         Integer pageSize = 2;
         String queryString = " " +
