@@ -30,6 +30,52 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testSubselectFetching() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        List<Pet> pets = session.createQuery(" select P from Pet as P ", Pet.class).getResultList();
+        System.out.println("****************from Query executed****************");
+        pets.stream().forEach(item -> {
+            if (item.getType().getName() != null) {
+                System.out.println("****************");
+                System.out.println(item.getName());
+                System.out.println(item.getType().getName());
+            }
+            System.out.println(item.getVisits().size());
+        });
+    }
+
+    @Test
+    public void testBatchFetching() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        List<Pet> pets = session.createQuery(" select P from Pet as P ", Pet.class).getResultList();
+        //session.clear(); => cause N + 1
+        System.out.println("****************from Query executed****************");
+        pets.stream().forEach(item -> {
+            if (item.getType().getName() != null) {
+                System.out.println("****************");
+                System.out.println(item.getName());
+                System.out.println(item.getType().getName());
+            }
+            System.out.println(item.getVisits().size());
+        });
+    }
+
+    @Test
+    public void testFetchJoin() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        List<Owner> owners =
+                session.createQuery(
+                        " select distinct O from Owner as O " +
+                                " left join fetch O.pets as P " +
+                                " left join fetch P.type as PT", Owner.class).getResultList();
+        System.out.println("****************from Owner Query executed****************");
+        owners.stream().forEach(item -> {
+            System.out.println("****************");
+            System.out.println("Owner pet size is : " + item.getPets().size());
+        });
+    }
+
+    @Test
     public void testSelectNPlusOneProblem() {
         Session session = HibernateConfig.getSessionFactory().openSession();
         List<Owner> owners = session.createQuery("from Owner ", Owner.class).getResultList();
@@ -38,7 +84,6 @@ public class HibernateTests {
             System.out.println("****************");
             System.out.println("Owner pet size is : " + item.getPets().size());
         });
-
     }
 
     @Test

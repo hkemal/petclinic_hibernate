@@ -1,5 +1,7 @@
 package com.javaegitimleri.petclinic.entity;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
@@ -23,14 +25,16 @@ public class Pet extends BaseEntity {
     @Temporal(TemporalType.DATE)
     private Date birthDate;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "type_id")
     private PetType type;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private Owner owner;
 
+    @Fetch(FetchMode.SUBSELECT)
+    //@BatchSize(size = 10)
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "pet_id")
     @OrderColumn(name = "visit_order")
