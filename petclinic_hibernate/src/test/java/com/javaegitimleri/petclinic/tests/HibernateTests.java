@@ -30,6 +30,18 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testSelectNPlusOneProblem() {
+        Session session = HibernateConfig.getSessionFactory().openSession();
+        List<Owner> owners = session.createQuery("from Owner ", Owner.class).getResultList();
+        System.out.println("****************from Owner Query executed****************");
+        owners.stream().forEach(item -> {
+            System.out.println("****************");
+            System.out.println("Owner pet size is : " + item.getPets().size());
+        });
+
+    }
+
+    @Test
     public void testCriteriaAPIWithJoinsAlias() {
         Session session = HibernateConfig.getSessionFactory().openSession();
         Criteria rootCriteria = session.createCriteria(Owner.class);
