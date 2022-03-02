@@ -9,15 +9,65 @@ import org.hibernate.Transaction;
 import org.hibernate.stat.SessionStatistics;
 import org.junit.Test;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import javax.persistence.criteria.*;
 import java.util.Date;
 import java.util.List;
 
 public class JpaTests {
+
+    @Test
+    public void testCriteriaWithMetaModel() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Pet> criteriaQuery = criteriaBuilder.createQuery(Pet.class);
+        Root<Pet> root = criteriaQuery.from(Pet.class);
+        Predicate predicate = criteriaBuilder.like(root.get(Pet_.name), "K%");
+        criteriaQuery.where(predicate);
+        TypedQuery<Pet> typedQuery = entityManager.createQuery(criteriaQuery);
+        List<Pet> resultList = typedQuery.getResultList();
+        resultList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaMultiSelectWithTuple() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Pet> criteriaQuery = criteriaBuilder.createQuery(Pet.class);
+        Root<Pet> root = criteriaQuery.from(Pet.class);
+        criteriaQuery.multiselect(root.get("name"), root.get("birthDate"));
+        TypedQuery<Pet> typedQuery = entityManager.createQuery(criteriaQuery);
+        List<Pet> resultList = typedQuery.getResultList();
+        resultList.forEach(System.out::println);
+    }
+
+    @Test
+    public void testCriteriaReturnDTO() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> tupleCriteriaQuery = criteriaBuilder.createTupleQuery();
+        Root<Pet> root = tupleCriteriaQuery.from(Pet.class);
+        tupleCriteriaQuery.multiselect(root.get("name").alias("petName"), root.get("birthDate").alias("birthDate"));
+        TypedQuery<Tuple> tupleTypedQuery = entityManager.createQuery(tupleCriteriaQuery);
+        List<Tuple> resultList = tupleTypedQuery.getResultList();
+        resultList.forEach(item -> {
+            System.out.println(item.get(0) + " - " + item.get("birthDate"));
+        });
+    }
+
+    @Test
+    public void testCriteriaWithLeftJoin() {
+        EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Owner> criteriaQuery = criteriaBuilder.createQuery(Owner.class);
+        Root<Owner> root = criteriaQuery.from(Owner.class);
+        Join<Owner, Pet> join = root.join("pets", JoinType.LEFT);
+        Predicate predicate = criteriaBuilder.like(join.get("name"), "K%");
+        criteriaQuery.where(predicate);
+        TypedQuery<Owner> typedQuery = entityManager.createQuery(criteriaQuery);
+        List<Owner> resultList = typedQuery.getResultList();
+        resultList.forEach(System.out::println);
+    }
 
     @Test
     public void testCriteriaWithInnerJoin() {
