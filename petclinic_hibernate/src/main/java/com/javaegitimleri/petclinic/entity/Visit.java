@@ -1,9 +1,7 @@
 package com.javaegitimleri.petclinic.entity;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "hsr_visit ")
