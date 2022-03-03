@@ -17,6 +17,24 @@ import java.util.List;
 public class JpaTests {
 
     @Test
+    public void testEntityCache() {
+        EntityManager entityManager1 = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx1 = entityManager1.getTransaction();
+        tx1.begin();
+        Pet pet1 = entityManager1.find(Pet.class, 1L);
+        tx1.commit();
+        entityManager1.close();
+
+        EntityManager entityManager2 = JpaConfig.getEntityManagerFactory().createEntityManager();
+        EntityTransaction tx2 = entityManager2.getTransaction();
+        tx2.begin();
+        Pet pet2 = entityManager2.find(Pet.class, 1L);
+        System.out.println(pet2.getName());
+        tx2.commit();
+        entityManager2.close();
+    }
+
+    @Test
     public void testBulkDeleteWithCriteriaApi() {
         EntityManager entityManager = JpaConfig.getEntityManagerFactory().createEntityManager();
         EntityTransaction tx = entityManager.getTransaction();

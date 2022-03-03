@@ -1,17 +1,21 @@
 package com.javaegitimleri.petclinic.entity;
 
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.*;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.*;
 import java.util.*;
 
-//@NamedQuery(name = "findPetsByName", query = "from Pet as P where P.name like :name")
+@Cacheable(true)
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 @SqlResultSetMapping(name = "petWithNameAndBirthDate", classes = @ConstructorResult(targetClass = Pet.class, columns = {
         @ColumnResult(name = "pet_name", type = String.class),
         @ColumnResult(name = "birth_date", type = Date.class)
 }))
+//@NamedQuery(name = "findPetsByName", query = "from Pet as P where P.name like :name")
 @Entity
 @Table(name = "hsr_pet")
 public class Pet extends BaseEntity {

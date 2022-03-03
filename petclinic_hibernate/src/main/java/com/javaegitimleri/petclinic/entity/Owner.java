@@ -1,5 +1,7 @@
 package com.javaegitimleri.petclinic.entity;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.Cascade;
 
 import javax.persistence.*;
@@ -31,6 +33,7 @@ public class Owner extends Person {
     @Embedded
     private Address address;
 
+    @Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
     @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
     @Cascade(org.hibernate.annotations.CascadeType.SAVE_UPDATE)
     private Set<Pet> pets = new HashSet<>();

@@ -30,6 +30,64 @@ import java.util.List;
 public class HibernateTests {
 
     @Test
+    public void testQueryCache() {
+        Session session1 = HibernateConfig.getSessionFactory().openSession();
+        Query<Pet> query1 = session1.createQuery(" select P from Pet as P ", Pet.class);
+        query1.setCacheable(true);
+        List<Pet> resultList1 = query1.getResultList();
+        resultList1.stream().forEach(System.out::println);
+        System.out.println(" --- query executed by the first session ---");
+        session1.close();
+
+        Session session2 = HibernateConfig.getSessionFactory().openSession();
+        Query<Pet> query2 = session2.createQuery(" select P from Pet as P ", Pet.class);
+        List<Pet> resultList2 = query2.getResultList();
+        resultList2.stream().forEach(System.out::println);
+        System.out.println(" --- query executed by the second session ---");
+        session2.close();
+
+
+    }
+
+    @Test
+    public void testCollectionCache() {
+        Session session1 = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx1 = session1.beginTransaction();
+        System.out.println("--- first session accessed owner pets collection ---");
+        Owner owner1 = session1.get(Owner.class, 13L);
+        System.out.println(owner1.getPets().size());
+        tx1.commit();
+        session1.close();
+
+        Session session2 = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx2 = session2.beginTransaction();
+        System.out.println("--- second session accessed owner pets collection ---");
+        Owner owner2 = session2.get(Owner.class, 13L);
+        System.out.println(owner2.getPets().size());
+        tx2.commit();
+        session2.close();
+    }
+
+    @Test
+    public void testEntityCache() {
+        Session session1 = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx1 = session1.beginTransaction();
+        Pet pet1 = session1.get(Pet.class, 1L);
+        System.out.println("--- first session loaded pet entity ---");
+        System.out.println(pet1);
+        tx1.commit();
+        session1.close();
+
+        Session session2 = HibernateConfig.getSessionFactory().openSession();
+        Transaction tx2 = session2.beginTransaction();
+        Pet pet2 = session2.get(Pet.class, 1L);
+        System.out.println("--- second session loaded pet entity ---");
+        System.out.println(pet2);
+        tx2.commit();
+        session2.close();
+    }
+
+    @Test
     public void testBulkDelete() {
         Session session = HibernateConfig.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
